@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+case "$@" in
+  ('start')
+    docker compose -f docker-compose.yml up -d;;
+  ('restart')
+    docker compose restart;;
+  ('destroy')
+    docker compose down -v --remove-orphans;;
+esac

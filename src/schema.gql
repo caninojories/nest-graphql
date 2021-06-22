@@ -1,0 +1,49 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Auth {
+  email: Email!
+  token: String!
+}
+
+"""Email custom scalar type"""
+scalar Email
+
+input InsertUserInput {
+  email: Email!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
+type LinkedIn {
+  URL: String!
+}
+
+type Mutation {
+  accessToken(code: String!): Boolean!
+  insertOne(user: InsertUserInput!): User!
+  signup(user: SignupInput!): Auth!
+}
+
+type Query {
+  getLinkedinURL: LinkedIn!
+  users: [User!]!
+}
+
+input SignupInput {
+  email: Email!
+  firstName: String!
+  lastName: String!
+  password: String!
+}
+
+type User {
+  _id: String
+  email: Email!
+  firstName: String!
+  lastName: String!
+  password: String!
+  userRole: String
+}

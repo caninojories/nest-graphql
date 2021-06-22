@@ -1,0 +1,34 @@
+version: '3.5'
+
+services:
+  nodejs:
+    container_name: api-api
+    networks:
+      - api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: always
+    environment:
+      - DATABASE_HOST=mongo
+      - PORT=3000
+    ports:
+      - '3267:3267'
+    depends_on: [mongo]
+  mongo:
+    container_name: api-mongo
+    networks:
+      - api
+    image: mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - /usr/local/mongodb:/data/db
+
+networks:
+  api:
+    name: api
+    driver: bridge
