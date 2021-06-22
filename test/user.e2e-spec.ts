@@ -1,14 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { join } from 'path';
 import { UserModule } from '@modules/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
-import { InsertUserInput } from '@modules/user/dto/insert-user.input';
-import { AuthModule } from '../src/modules/auth/auth.module';
+import { SignupInput } from '@modules/auth/dto/sign-up.input';
+import { AuthModule } from '@modules/auth/auth.module';
 import { EmailScalar } from '@src/scalars/email.scalar';
 
 describe('Users (e2e)', () => {
-  let app;
+  let app: INestApplication;
   const host = process.env.DATABASE_HOST || 'localhost';
 
   beforeAll(async () => {
@@ -18,9 +20,13 @@ describe('Users (e2e)', () => {
         AuthModule,
         MongooseModule.forRoot(`mongodb://${host}/nestgraphqltesting`),
         GraphQLModule.forRoot({
-          typePaths: ['./**/*.graphql'],
-          context: ({ req }) => ({ req }),
-          playground: true,
+          autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+          path: '/graphql/api',
+          context: ({ req, res }) => ({ req, res }),
+          definitions: {
+            path: join(process.cwd(), 'src/graphql.ts'),
+            outputAs: 'interface',
+          },
         }),
       ],
     }).compile();
@@ -33,31 +39,36 @@ describe('Users (e2e)', () => {
     await app.close();
   });
 
-  const user: InsertUserInput = {
+  const user: SignupInput = {
     email: 'test@test.com' as unknown as EmailScalar,
     password: '!somepassword123!',
     firstName: 'Jo-Ries',
     lastName: 'Canino',
   };
 
-  const createUserQuery = `
-    mutation{
-        register(email: "${user.email}", password: "${user.password}"){
-          email,
-          token
-        }
+  const signupQuery = `
+    mutation {
+      signup(user: {
+        email: "${user.email}",
+        password: "${user.password}",
+        firstName: "${user.firstName}",
+        lastName: "${user.lastName}"
+      }) {
+        email,
+        token
       }
+    }
   `;
 
-  it('register', () => {
+  it('signup', () => {
     return request(app.getHttpServer())
-      .post('/graphql')
+      .post('/graphql/api')
       .send({
         operationName: null,
-        query: createUserQuery,
+        query: signupQuery,
       })
       .expect(({ body }) => {
-        const data = body.data.register;
+        const data = body.data.signup;
         expect(data.email).toBe(user.email);
         expect(data.token).not.toBeNull();
       })

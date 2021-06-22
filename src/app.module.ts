@@ -22,6 +22,7 @@ const mongoDbConfig = config.get('mongoDb');
       sortSchema: true,
       playground: true,
       debug: true,
+      path: '/graphql/api',
       context: ({ req, res }) => ({ req, res }),
       definitions: {
         path: join(process.cwd(), 'src/graphql.ts'),
