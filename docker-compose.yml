@@ -26,8 +26,11 @@ services:
     ports:
       - '27017:27017'
     volumes:
-      - /usr/local/mongodb:/data/db
+      - mongodb-data:/data/db
 
+volumes:
+  mongodb-data:
+    
 networks:
   api:
     name: api

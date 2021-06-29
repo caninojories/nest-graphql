@@ -7,4 +7,6 @@ case "$@" in
     docker compose restart;;
   ('destroy')
     docker compose down -v --remove-orphans;;
+  ('clean')
+    docker compose down --rmi all -v --remove-orphans;;
 esac
