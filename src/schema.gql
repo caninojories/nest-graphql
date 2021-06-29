@@ -2,34 +2,92 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Auth {
+type AuthType {
   email: Email!
   token: String!
 }
 
+type CompanyModel {
+  _id: String
+  industry: Industry
+  name: String
+}
+
+type ContactModel {
+  _id: String
+  company: CompanyModel
+  firstName: String!
+  lastName: String!
+}
+
+type CreditHistoryModel {
+  _id: String
+  amount: Float!
+  updateAt: DateTime!
+  value: Float!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 """Email custom scalar type"""
 scalar Email
 
-input InsertUserInput {
-  email: Email!
-  firstName: String!
-  lastName: String!
-  password: String!
+type FilterModel {
+  _id: String
+  description: String
+  name: String!
+  subFilter: SubFilter!
 }
 
-type LinkedIn {
+input FiltersInput {
+  name: String!
+  subFilter: Sub!
+}
+
+type Industry {
+  category: String!
+  naics: String!
+  sic: String!
+}
+
+input InsertOneInput {
+  count: Float!
+  filters: [String!]!
+  lastName: String!
+  name: String!
+}
+
+type LinkedInType {
   URL: String!
 }
 
+type Linkedin {
+  accessToken: String!
+  expiresIn: Float!
+}
+
+type ListModel {
+  _id: String
+  count: Float!
+  filters: [FilterModel!]!
+  name: String!
+  timesDownloaded: Float!
+  user: UserModel!
+}
+
 type Mutation {
-  accessToken(code: String!): Boolean!
-  insertOne(user: InsertUserInput!): User!
-  signup(user: SignupInput!): Auth!
+  accessToken(code: String!): AuthType!
+  insertOne(list: InsertOneInput!): ListModel!
+  signup(user: SignupInput!): AuthType!
 }
 
 type Query {
-  getLinkedinURL: LinkedIn!
-  users: [User!]!
+  findMany(filters: [FiltersInput!]!): [ContactModel!]!
+  getLinkedinURL: LinkedInType!
+  users: [UserModel!]!
 }
 
 input SignupInput {
@@ -39,11 +97,31 @@ input SignupInput {
   password: String!
 }
 
-type User {
+input Sub {
+  category: [String!]!
+  naics: [String!]!
+  sic: [String!]!
+}
+
+type SubFilter {
+  category: [String!]!
+  naics: [String!]!
+  sic: [String!]!
+}
+
+type SubscriptionStripeModel {
+  _id: String
+  cost: Float!
+  description: String!
+  name: String!
+}
+
+type UserModel {
   _id: String
   email: Email!
   firstName: String!
   lastName: String!
-  password: String!
-  userRole: String
+  linkedin: Linkedin
+  password: String
+  phoneNumber: String
 }
