@@ -11,7 +11,7 @@ export class InsertUserInput {
   @Field()
   @IsString()
   @IsNotEmpty()
-  password: string;
+  password?: string;
 
   @Field()
   @IsString()

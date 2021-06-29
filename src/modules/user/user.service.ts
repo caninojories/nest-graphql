@@ -2,48 +2,34 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import axios from 'axios';
-import { User, UserDocument } from './models/user.model';
-import { InsertUserInput } from './dto/insert-user.input';
-import { PayLoad } from '@shared/interfaces';
-import { ILiteProfile, ILinkedInEmailAddress } from '@shared/interfaces';
-import { SignupInput } from './dto';
+import { UserModel, UserDocument } from '@models/user.model';
+import {
+  ILiteProfile,
+  ILinkedInEmailAddress,
+  PayLoad,
+} from '@shared/interfaces';
+import { InsertUserInput } from './dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(UserModel.name)
+    private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async showAll(): Promise<User[]> {
+  async showAll(): Promise<UserModel[]> {
     return await this.userModel.find();
   }
 
-  async insertOne(userDto: InsertUserInput): Promise<User> {
-    const { email } = userDto;
-    const user = await this.userModel.findOne({ email });
-    if (user) {
-      throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
-    }
+  async insertOne(userDto: InsertUserInput): Promise<UserModel> {
+    const user: UserDocument = new this.userModel(userDto);
 
-    const createdUser: UserDocument = new this.userModel(userDto);
-    return await createdUser.save();
+    return await user.save();
   }
 
-  async signup(userDto: SignupInput): Promise<User> {
-    const { email } = userDto;
-    const user = await this.userModel.findOne({ email });
-    if (user) {
-      throw new HttpException('User already exists', HttpStatus.BAD_REQUEST);
-    }
-
-    // (await bcrypt.compare(password, user.password))
-    const createdUser: UserDocument = new this.userModel(userDto);
-    return await createdUser.save();
-  }
-
-  async findByPayload(payLoad: PayLoad): Promise<User> {
+  async findByPayload(payLoad: PayLoad): Promise<UserModel> {
     const { email } = payLoad;
-    const user: User = await this.userModel.findOne({ email });
+    const user: UserModel = await this.userModel.findOne({ email });
     delete user.password;
 
     return user;

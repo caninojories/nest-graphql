@@ -1,2 +1,2 @@
-export * from './sign-up.args';
-export * from './sign-up.input';
+export * from './insert-user.args';
+export * from './insert-user.input';
