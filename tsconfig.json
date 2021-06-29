@@ -17,6 +17,8 @@
       "@shared/*": ["src/shared/*"],
       "@scalars/*": ["src/scalars/*"],
       "@guards/*": ["src/guards/*"],
+      "@models/*": ["src/models/*"],
+      "@models": ["src/models/"],
       "@decorators/*": ["src/decorators/*"],
       "@filters/*": ["src/filters/*"]
     }
