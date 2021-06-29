@@ -3,6 +3,7 @@ import {
   HealthCheck,
   HealthCheckService,
   HttpHealthIndicator,
+  HealthCheckResult,
 } from '@nestjs/terminus';
 
 @Controller('health')
@@ -14,7 +15,7 @@ export class HealthController {
 
   @Get()
   @HealthCheck()
-  check() {
+  check(): Promise<HealthCheckResult> {
     return this.health.check([
       () => this.http.pingCheck('health', 'https://google.com'),
     ]);
