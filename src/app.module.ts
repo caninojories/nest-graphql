@@ -1,22 +1,17 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
-import { MongooseModule } from '@nestjs/mongoose';
+import { join } from 'path';
 import { HealthModule } from '@modules/health/health.module';
 import { UserModule } from '@modules/user/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { Database } from '@modules/database/database.module';
+import { ListModule } from '@modules/list/list.module';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
-import { join } from 'path';
-import config from 'config';
-
-const mongoDbConfig = config.get('mongoDb');
 
 @Module({
   imports: [
-    MongooseModule.forRoot(mongoDbConfig.uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }),
+    Database,
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
@@ -32,6 +27,7 @@ const mongoDbConfig = config.get('mongoDb');
     UserModule,
     AuthModule,
     HealthModule,
+    ListModule,
   ],
   controllers: [],
   providers: [
