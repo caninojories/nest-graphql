@@ -9,19 +9,11 @@ Api Implementation.
 1. [Node.JS](https://github.com/nvm-sh/nvm) LTS version (v14.16.0)
 2. [Docker](https://www.docker.com)
 
-## Docker
-
-````bash
-# mongo
-$ docker pull mongo
-$ docker run --name api-mongo --publish 27017:27017 -d mongo
-````
-
 ## Installation
 
 ```bash
 $ npm ci
-````
+```
 
 ## Running the app
 
@@ -47,7 +39,6 @@ $ ./dcp restart
 
 # destroy the docker containers
 $ ./dcp destroy
-
 ```
 
 ## Test
