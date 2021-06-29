@@ -7,11 +7,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { PayLoad } from '@shared/interfaces';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
-import { Auth, LinkedIn } from './models';
-import { User } from '../user/models/user.model';
+import { AuthType, LinkedInType } from './types';
+import { UserModel } from '@models';
 import { SignupArgs } from './dto';
 import { ILinkedIn } from '@shared/interfaces';
 import { httpStatus } from '@shared/utils';
+import { EmailScalar } from '@src/scalars/email.scalar';
 
 const linkedIn: ILinkedIn = config.get('linkedIn');
 
@@ -22,15 +23,15 @@ export class AuthResolver {
     private userService: UserService,
   ) {}
 
-  @Mutation(() => Auth)
+  @Mutation(() => AuthType)
   async signup(
     @Args({ type: () => SignupArgs }) { user }: SignupArgs,
-  ): Promise<Auth> {
-    const userModel: User = new User();
+  ): Promise<AuthType> {
+    const userModel: UserModel = new UserModel();
     userModel.assimilate(user);
 
     try {
-      const response: User = await this.userService.insertOne(userModel);
+      const response: UserModel = await this.userService.insertOne(userModel);
       const payLoad: PayLoad = {
         email: response.email,
       };
@@ -42,9 +43,9 @@ export class AuthResolver {
     }
   }
 
-  @Query(() => LinkedIn)
-  async getLinkedinURL(): Promise<LinkedIn> {
-    const linkedin: LinkedIn = new LinkedIn();
+  @Query(() => LinkedInType)
+  async getLinkedinURL(): Promise<LinkedInType> {
+    const linkedin: LinkedInType = new LinkedInType();
     linkedin.URL = `${linkedIn.baseURL}?response_type=code&client_id=${
       linkedIn.clientId
     }&redirect_uri=${linkedIn.redirectURL}&state=${uuidv4()}&scope=${
@@ -54,8 +55,8 @@ export class AuthResolver {
     return linkedin;
   }
 
-  @Mutation(() => Boolean)
-  async accessToken(@Args('code') code: string): Promise<boolean> {
+  @Mutation(() => AuthType)
+  async accessToken(@Args('code') code: string): Promise<{ token: string }> {
     try {
       const response: AxiosResponse<{
         access_token: string;
@@ -76,10 +77,35 @@ export class AuthResolver {
         },
       );
 
-      await this.userService.linkedInMe(response.data.access_token);
-      await this.userService.linkedInEmailAddress(response.data.access_token);
+      const profile = await this.userService.linkedInMe(
+        response.data.access_token,
+      );
+      const emailAddress = await this.userService.linkedInEmailAddress(
+        response.data.access_token,
+      );
 
-      return true;
+      const user = new UserModel();
+      user.assimilate({
+        firstName: profile.firstName.localized.en_US,
+        lastName: profile.lastName.localized.en_US,
+        email: <EmailScalar>(
+          (<unknown>emailAddress.elements[0]['handle~'].emailAddress)
+        ),
+        linkedin: {
+          accessToken: response.data.access_token,
+          expiresIn: response.data.expires_in,
+        },
+      });
+
+      await this.userService.insertOne(user);
+      const payLoad: PayLoad = {
+        email: user.email,
+      };
+      const token = await this.authService.signPayload(payLoad);
+
+      return {
+        token,
+      };
     } catch (exception) {
       throw new HttpException(exception, httpStatus(exception));
     }

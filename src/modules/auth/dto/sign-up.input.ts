@@ -7,7 +7,7 @@ export class SignupInput {
   @Field()
   @IsEmail()
   @IsNotEmpty()
-  email!: EmailScalar;
+  email: EmailScalar;
 
   @Field()
   @IsString()
